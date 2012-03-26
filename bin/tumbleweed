@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+blog, email, password, theme_file = *ARGV
+
+Tumbleweed.upload_theme blog, email, password, theme_file
