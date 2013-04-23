@@ -16,7 +16,7 @@ module Tumbleweed
     page = agent.get("http://www.tumblr.com/customize/#{blog}")
     user_form_key = page.body.scan(/Tumblr\.Customize\.user_form_key\s*=\s*'([^']+)';/).flatten.first
 
-    theme = File.read(theme_file)
+    theme = theme_file == "-" ? STDIN.read : File.read(theme_file)
     config = config_file ? YAML.load_file(config_file) : {}
 
     json = config.merge(
