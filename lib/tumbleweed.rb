@@ -1,10 +1,12 @@
 require "tumbleweed/version"
 require "mechanize"
 require "json"
+require "logger"
 
 module Tumbleweed
   def self.upload_theme blog, email, password, theme_file, config_file = nil
     agent = Mechanize.new
+    agent.log = Logger.new(STDERR) if ENV['DEBUG']
     page = agent.get "https://www.tumblr.com/login"
 
     login_form = page.forms.first
