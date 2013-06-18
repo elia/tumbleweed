@@ -6,10 +6,7 @@ require File.dirname(__FILE__) + "/../lib/tumbleweed"
 
 class Test::Unit::TestCase
   def test_upload_theme
-    assert ENV['BLOG'], "BLOG is required"
-    assert ENV['EMAIL'], "EMAIL is required"
-    assert ENV['PASSWORD'], "PASSWORD is required"
-    
+    assert_equal 3, [ENV['BLOG'], ENV['EMAIL'], ENV['PASSWORD']].compact.length, "BLOG, EMAIL and PASSWORD are required"
     random_string = rand.to_s
     
     theme_file = Tempfile.new(__FILE__)
