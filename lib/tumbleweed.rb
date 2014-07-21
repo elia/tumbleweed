@@ -1,33 +1,32 @@
-require "tumbleweed/version"
-require "mechanize"
-require "json"
-require "logger"
+require 'tumbleweed/version'
+require 'mechanize'
+require 'json'
+require 'logger'
 
 module Tumbleweed
-  def self.upload_theme blog, email, password, theme_file, config_file = nil
+  LOGIN_URL = 'https://www.tumblr.com/login'
+
+  def self.upload_theme blog_name, email, password, theme_file, config_file = nil
     agent = Mechanize.new
     agent.log = Logger.new(STDERR) if ENV['DEBUG']
-    page = agent.get "https://www.tumblr.com/login"
+    page = agent.get LOGIN_URL
 
-    login_form = page.forms.first
-    login_form.action = "/login"
-    login_form["user[email]"] = email
-    login_form["user[password]"] = password
-    agent.submit(login_form)
+    form = page.forms.find { |form| form.action == LOGIN_URL }
+    form['user[email]'] = email
+    form['user[password]'] = password
+    agent.submit(form)
+    raise 'login failed' unless agent.cookies.find { |cookie| cookie.name == 'logged_in' }
 
-    page = agent.get("http://www.tumblr.com/customize/#{blog}")
-    user_form_key = page.body.scan(/\.user_form_key\s*=\s*'([^']+)';/).flatten.first
+    page = agent.get("https://www.tumblr.com/customize/#{blog_name}")
+    body = page.body
 
-    theme = theme_file == "-" ? STDIN.read : File.read(theme_file)
-    config = config_file ? YAML.load_file(config_file) : {}
+    blog = JSON.parse(body[/Tumblr\._init\.blog = (\{[^\n]+\});/, 1])
+    blog.reverse_merge(YAML.load_file(config_file)) if config_file
+    blog['user_form_key'] = body[/Tumblr\._init\.user_form_key = '([^\n]+)';/, 1]
+    blog['secure_form_key'] = body[/Tumblr\._init\.secure_form_key = '([^\n]+)';/, 1]
+    blog['custom_theme'] = theme_file == '-' ? STDIN.read : File.read(theme_file)
+    blog['id'] = blog_name
 
-    json = config.merge(
-      'user_form_key' => user_form_key,
-      'id'            => blog,
-      'custom_theme'  => theme,
-      'name'          => blog
-    )
-
-    agent.post("http://www.tumblr.com/customize_api/blog/#{blog}", json.to_json)
+    agent.post("https://www.tumblr.com/customize_api/blog/#{blog_name}", blog.to_json)
   end
 end
