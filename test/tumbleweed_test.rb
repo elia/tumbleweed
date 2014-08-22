@@ -1,12 +1,15 @@
-require 'test/unit'
+require 'minitest/autorun'
 require 'tempfile'
 require 'open-uri'
 
 require File.dirname(__FILE__) + "/../lib/tumbleweed"
 
-class Test::Unit::TestCase
-  def test_upload_theme
+describe Tumbleweed do
+  before do
     assert_equal 3, [ENV['BLOG'], ENV['EMAIL'], ENV['PASSWORD']].compact.length, "BLOG, EMAIL and PASSWORD are required"
+  end
+
+  it "uploads a theme" do
     unique_string = [Time.now, rand].to_s
 
     theme_file = Tempfile.new('tumbleweed')
@@ -15,6 +18,9 @@ class Test::Unit::TestCase
     Tumbleweed.upload_theme ENV['BLOG'], ENV['EMAIL'], ENV['PASSWORD'], theme_file.path
     
     actual = open("http://#{ENV['BLOG']}.tumblr.com/?#{rand}").read
-    assert_include actual, unique_string
+    actual.must_include unique_string
+  end
+
+  it "downloads a theme" do
   end
 end
