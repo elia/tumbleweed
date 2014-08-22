@@ -29,4 +29,22 @@ module Tumbleweed
 
     agent.post("https://www.tumblr.com/customize_api/blog/#{blog_name}", blog.to_json)
   end
+
+  def self.download_theme blog_name, email, password
+    agent = Mechanize.new
+    agent.log = Logger.new(STDERR) if ENV['DEBUG']
+    page = agent.get LOGIN_URL
+
+    form = page.forms.find { |form| form.action == LOGIN_URL }
+    form['user[email]'] = email
+    form['user[password]'] = password
+    agent.submit(form)
+    raise 'login failed' unless agent.cookies.find { |cookie| cookie.name == 'logged_in' }
+
+    page = agent.get("https://www.tumblr.com/customize/#{blog_name}")
+    body = page.body
+
+    blog = JSON.parse(body[/Tumblr\._init\.blog = (\{[^\n]+\});/, 1])
+    blog['custom_theme']
+  end
 end

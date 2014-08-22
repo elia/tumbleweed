@@ -22,5 +22,14 @@ describe Tumbleweed do
   end
 
   it "downloads a theme" do
+    unique_string = [Time.now, rand].to_s
+
+    theme_file = Tempfile.new('tumbleweed')
+    theme_file << unique_string
+    theme_file.flush
+    Tumbleweed.upload_theme ENV['BLOG'], ENV['EMAIL'], ENV['PASSWORD'], theme_file.path
+
+    actual = Tumbleweed.download_theme ENV['BLOG'], ENV['EMAIL'], ENV['PASSWORD']
+    actual.must_include unique_string
   end
 end
