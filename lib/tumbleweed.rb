@@ -7,8 +7,6 @@ module Tumbleweed
   LOGIN_URL = 'https://www.tumblr.com/login'
   
   class Client
-    attr_reader :agent
-    
     def initialize
       @agent = Mechanize.new
       @agent.log = Logger.new(STDERR) if ENV['DEBUG']
