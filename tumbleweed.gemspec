@@ -17,6 +17,6 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   
   gem.add_development_dependency 'rake'
-  gem.add_runtime_dependency 'mechanize', '~> 2.1'
-  gem.add_runtime_dependency 'json', '~> 1.6.3'
+  gem.add_runtime_dependency 'mechanize'
+  gem.add_runtime_dependency 'json'
 end
